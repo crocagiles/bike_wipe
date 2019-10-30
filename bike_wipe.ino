@@ -6,7 +6,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #define PIN      6
-#define N_LEDS 150
+#define N_LEDS 128
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN, NEO_GRB + NEO_KHZ800);
 int n[ 127 ];
@@ -177,7 +177,7 @@ void loop() {
 }
 
 static void test_pix(uint8_t pxLoc) {
-  for (uint16_t i = 0; i < 150; i++) {
+  for (uint16_t i = 0; i < 128; i++) {
     strip.setPixelColor(i, strip.Color(0, 0, 0) );
   }
   strip.show();
@@ -192,7 +192,7 @@ static void display(uint8_t litPerc) {
 
   // Serial.println(strip.getPixelColor(1));
 
-  for (int i = 0; i < 127; i++) {
+  for (int i = 0; i < 128; i++) {
     int led = i;
     int perc = n[i];
 
