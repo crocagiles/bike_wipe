@@ -10,6 +10,7 @@
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN, NEO_GRB + NEO_KHZ800);
 int n[ 127 ];
+int clocky = 0;
 
 void setup() {
   strip.begin();
@@ -162,14 +163,17 @@ n[ 127 ] = 0;
 
 
 void loop() {
+  
+  clocky++;
   // chase(strip.Color(255, 0, 0)); // Red
   // chase(strip.Color(0, 255, 0)); // Green
   // chase(strip.Color(0, 0, 255)); // Blue
   // section_one(strip.Color(255, 0, 0));
 
-  for (uint16_t i = 0; i < 26; i++) {
+  for (uint16_t i = 0; i < 29; i++) {
     display(i);
     delay(25);
+    
   }
 
   // test_pix(27);
@@ -187,6 +191,32 @@ static void test_pix(uint8_t pxLoc) {
   delay(250);
 
 }
+
+static void push_sine() {
+  int clocky = 0;
+  for (uint16_t x = 0; x < 29; x++) { // iterates of x positions on bike
+    clocky++;
+    for (uint16_t i = 0; i < 128; i++) { // iterates over each of the LEDs
+      if (x != 0) { //propagate from previous pixel if we are not on x position 0
+        int prev_x = x - 1;
+        // TODO pull pixel value from a pixel index (0-127) instead of x axis index (0-27)
+        if (n[i] == x) {
+          int prev_color = strip.getPixelColor(prev_x); // TODO get color from index of i instead of x
+          // TODO set color
+        }
+      }
+      if (x == 0) {
+        if (n[i] == 0) { //if x position is 0, aka LED position is on the headset. 
+          float val = sin(clocky); 
+          // TODO map to 0: 255
+          strip.setPixelColor(i, strip.Color(val, 0, 0) ); // sets pixels at x position 0 to sin
+        }
+      }
+    }
+  strip.show();
+  }
+}
+
 
 static void display(uint8_t litPerc) {
 
