@@ -8,7 +8,7 @@ down_tube = list(range(0, 16))
 down_tube_r = down_tube[::-1]
 
 # seat_tube = 10 * [15]
-seat_tube = [10, 11, 12, 13, 14, 14, 13, 12, 11, 10]
+seat_tube = [15,16,17,18,19,19,18,17,16,15]
 
 seat_stay = list(range(15, 28))
 seat_stay_r = seat_stay[::-1]
