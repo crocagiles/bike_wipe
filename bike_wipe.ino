@@ -2,6 +2,8 @@
 
 */
 
+//Constants
+
 
 #include <Adafruit_NeoPixel.h>
 
@@ -12,9 +14,68 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN, NEO_GRB + NEO_KHZ800);
 int n[ 128 ];
 int clocky = 0;
 
+const int buttonPinRed   = 4;     
+const int buttonPinGreen = 5;
+const int buttonPinWhite = 6;
+const int buttonPinBlue  = 7;
+
+int lastStateRed   = 0;
+int lastStateGreen = 0;
+int lastStateWhite = 0;
+int lastStateBlue = 0;
+// int red_button_state   = 0;
+// int green_button_state = 0;
+// int blue_button_state = 0;
+// int white_button_state  = 0;
+
+//RGB stuff
+int baseR;
+int baseG;
+int baseB;
+int red = 0;
+int green = 0;
+int blue = 0 ;
+int r;
+int g;
+int b;
+int red_hold_time = 0;
+int green_hold_time = 0;
+int blue_hold_time = 0;
+int white_hold_time = 0;
+int sinAmp    = 1;
+float period1 = 1;
+
+uint8_t baseColors[][3] = {{232, 50, 255},   // purple
+                        {250, 100, 20},   // yellow 
+                        {30, 30, 255},   // blue
+                        {237,159,176},    // pink
+                        {255, 0, 0},      // red
+                        {70, 87,229},     // Dark blue
+                        {50,255,50},
+                        {0,255,0},
+                        {255,0,0},
+                        {0,0,255},
+                        {255,0,220},
+                                  };     // Lt Green
+#define chosenColor sizeof(baseColors) / 3
+
 void setup() {
   strip.begin();
   Serial.begin(9600);
+  
+  pinMode(buttonPinRed,   INPUT);
+  pinMode(buttonPinGreen, INPUT);
+  pinMode(buttonPinWhite, INPUT);
+  pinMode(buttonPinBlue,  INPUT);
+  baseR = 0;
+  baseG = 0;
+  baseB = 0;
+  r = 0;
+  g = 0;
+  b = 0;
+  strip.setBrightness(255);
+  strip.show(); // Initialize all pixels to 'off'
+  //delay(1000);
   // led : percent
 
 // 1.) Left Downtube
@@ -165,6 +226,59 @@ n[ 127 ] = 0;
 void loop() {
   
   clocky++;
+  
+  int indy = random(chosenColor);
+  int red = baseColors[indy][0];
+  int green = baseColors[indy][1];
+  int blue = baseColors[indy][2];
+  
+  int red_button_state   = digitalRead(buttonPinRed);
+  int green_button_state = digitalRead(buttonPinGreen);
+  int blue_button_state = digitalRead(buttonPinWhite);
+  int white_button_state  = digitalRead(buttonPinBlue);
+  
+  
+  // If white Button Gets Pressed
+  if (white_button_state == 0) {
+    white_hold_time++;}
+  else {
+    white_hold_time = 0;
+  }
+  
+  if (white_hold_time > 0){
+    Serial.println("white_button");
+    shoot_wave(clocky, 0, red, green ,blue);
+    shoot_wave(clocky, 0, 0, 0 , 0);
+    return;
+  }
+  
+  if (red_button_state == 0) {
+    red_hold_time++;
+  }
+  else {
+    red_hold_time = 0;
+  }
+  if (red_hold_time > 100){
+    while (1==1) {
+      Serial.println("red_button_on");
+      int indy = random(chosenColor);
+      int red = baseColors[indy][0];
+      int green = baseColors[indy][1];
+      int blue = baseColors[indy][2];
+      shoot_wave(clocky, 5, red, green ,blue);
+      shoot_wave(clocky, 5, 0, 0 , 0);
+      
+      white_button_state  = digitalRead(buttonPinBlue);
+      if (white_button_state == 0) {
+        return;
+      }
+      
+    }
+  }
+  
+
+
+  
   // chase(strip.Color(255, 0, 0)); // Red
   // chase(strip.Color(0, 255, 0)); // Green
   // chase(strip.Color(0, 0, 255)); // Blue
@@ -181,10 +295,29 @@ void loop() {
 
   // test_pix(0);
   
-  osc_x_0(clocky);
+  // osc_x_0(clocky);
+  // shoot_wave(clocky, red, green , blue);
+  // shoot_wave(clocky, 0, 0 , 0);
   // prop_x_zero();
+  
+  turn_off();
 
 }
+
+static void shoot_wave(double clocky, int wait, int rd, int gr, int bl){
+  int x_zeros[] = {0,127,98,97};
+  int count = 4;
+  
+  for (uint16_t i=0; i<4; i++) {
+    int x = x_zeros[i];
+    strip.setPixelColor(x, strip.Color(rd, gr, bl) );
+  }
+
+  // strip.show();
+  prop_x_zero(wait);
+  
+}
+
 
 static void osc_x_0(double clocky){
   int x_zeros[] = {0,127,98,97};
@@ -197,7 +330,7 @@ static void osc_x_0(double clocky){
   }
   Serial.println(osc);
   // strip.show();
-  prop_x_zero();
+  prop_x_zero(0);
   
 }
 
@@ -213,14 +346,14 @@ static void test_pix(uint8_t pxLoc) {
 
 }
 
-static void prop_x_zero() {
+static void prop_x_zero(int wait) {
   for (uint16_t x = 1; x < 28; x++) {
     int prev_x = x - 1;
     for (uint16_t i = 0; i < 128; i++) { // iterates over each of the LEDs
       uint32_t prev_color = strip.getPixelColor(prev_x); //propagate from previous pixel if we are not on x position 0
       if (n[i] == x) {
         strip.setPixelColor(i, prev_color);
-        delay(10);
+        delay(wait);
       }
     }
   strip.show();
@@ -313,4 +446,11 @@ static void section_one(uint32_t c) {
 
 }
 
+
+void turn_off() {
+  for(uint16_t i=0; i<128; i++) {
+      strip.setPixelColor(i, 0);
+  }
+  strip.show();
+}
 
