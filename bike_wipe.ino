@@ -9,7 +9,7 @@
 #define N_LEDS 128
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN, NEO_GRB + NEO_KHZ800);
-int n[ 127 ];
+int n[ 128 ];
 int clocky = 0;
 
 void setup() {
@@ -170,45 +170,80 @@ void loop() {
   // chase(strip.Color(0, 0, 255)); // Blue
   // section_one(strip.Color(255, 0, 0));
 
-  for (uint16_t i = 0; i < 29; i++) {
-    display(i);
-    delay(25);
+  // for (uint16_t i = 0; i < 28; i++) {
+  //   display(i);
+  //   delay(25);
     
-  }
+  // }
+  
+  // push_sine(clocky);
+  // delay(25);
 
-  // test_pix(27);
+  test_pix(0);
+  // prop_x_zero();
 
 }
 
 static void test_pix(uint8_t pxLoc) {
-  for (uint16_t i = 0; i < 128; i++) {
-    strip.setPixelColor(i, strip.Color(0, 0, 0) );
-  }
+  // for (uint16_t i = 0; i < 128; i++) {
+  //   strip.setPixelColor(i, strip.Color(0, 0, 0) );
+  // }
+  
+  strip.setPixelColor(0, strip.Color(0, 0, 0) );
   strip.show();
-  delay(50);
-  strip.setPixelColor(pxLoc, strip.Color(255, 0, 0) );
+  prop_x_zero();
+  // delay(100);
+  strip.setPixelColor(0, strip.Color(0, 0, 255) );
   strip.show();
-  delay(250);
+  prop_x_zero();
+
 
 }
 
-static void push_sine() {
-  int clocky = 0;
-  for (uint16_t x = 0; x < 29; x++) { // iterates of x positions on bike
-    clocky++;
+static void prop_x_zero() {
+  for (uint16_t x = 1; x < 28; x++) {
+    int prev_x = x - 1;
     for (uint16_t i = 0; i < 128; i++) { // iterates over each of the LEDs
-      if (x != 0) { //propagate from previous pixel if we are not on x position 0
-        int prev_x = x - 1;
+      uint32_t prev_color = strip.getPixelColor(prev_x); //propagate from previous pixel if we are not on x position 0
+      if (n[i] == x) {
+        strip.setPixelColor(i, prev_color);
+        delay(1);
+      }
+    }
+  strip.show();
+  }
+}
+
+
+static void push_sine(double clocky) {
+  
+  int val = (cos(clocky) + 1.0) * (256/2);
+  // Serial.println(val);
+  
+  // delay(250);
+  
+  // Serial.println(clocky);
+  for (uint16_t x = 0; x < 28; x++) {
+    // Serial.print("X POS: ");
+    // Serial.println(x);
+    // delay(200);
+    int prev_x = x - 1;
+    for (uint16_t i = 0; i < 128; i++) { // iterates over each of the LEDs
+      if (x != 0) { 
+        uint32_t prev_color = strip.getPixelColor(prev_x); //propagate from previous pixel if we are not on x position 0
         // TODO pull pixel value from a pixel index (0-127) instead of x axis index (0-27)
         if (n[i] == x) {
-          int prev_color = strip.getPixelColor(prev_x); // TODO get color from index of i instead of x
+          // Serial.print("set pixels here to prev value:");
+          // Serial.println(i);
+          // Serial.println(prev_color);
+          
+           // TODO get color from index of i instead of x
+          strip.setPixelColor(i, prev_color );
           // TODO set color
         }
       }
-      if (x == 0) {
+      else if (x == 0) {
         if (n[i] == 0) { //if x position is 0, aka LED position is on the headset. 
-          float val = sin(clocky); 
-          // TODO map to 0: 255
           strip.setPixelColor(i, strip.Color(val, 0, 0) ); // sets pixels at x position 0 to sin
         }
       }
