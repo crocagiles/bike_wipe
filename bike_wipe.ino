@@ -179,24 +179,37 @@ void loop() {
   // push_sine(clocky);
   // delay(25);
 
-  test_pix(0);
+  // test_pix(0);
+  
+  osc_x_0(clocky);
   // prop_x_zero();
 
 }
 
-static void test_pix(uint8_t pxLoc) {
-  // for (uint16_t i = 0; i < 128; i++) {
-  //   strip.setPixelColor(i, strip.Color(0, 0, 0) );
-  // }
+static void osc_x_0(double clocky){
+  int x_zeros[] = {0,127,98,97};
+  int count = 4;
   
-  strip.setPixelColor(0, strip.Color(0, 0, 0) );
-  strip.show();
+  int osc = (sin(clocky) + 1) * (256/2);
+  for (uint16_t i=0; i<4; i++) {
+    int x = x_zeros[i];
+    strip.setPixelColor(x, strip.Color(0, 0, osc) );
+  }
+  Serial.println(osc);
+  // strip.show();
   prop_x_zero();
-  // delay(100);
-  strip.setPixelColor(0, strip.Color(0, 0, 255) );
-  strip.show();
-  prop_x_zero();
+  
+}
 
+static void test_pix(uint8_t pxLoc) {
+  for (uint16_t i = 0; i < 128; i++) {
+    strip.setPixelColor(i, strip.Color(0, 0, 0) );
+  }
+  strip.show();
+  delay(250);
+  strip.setPixelColor(pxLoc, strip.Color(255, 0, 0) );
+  strip.show();
+  delay(250);
 
 }
 
@@ -207,7 +220,7 @@ static void prop_x_zero() {
       uint32_t prev_color = strip.getPixelColor(prev_x); //propagate from previous pixel if we are not on x position 0
       if (n[i] == x) {
         strip.setPixelColor(i, prev_color);
-        delay(1);
+        delay(10);
       }
     }
   strip.show();
