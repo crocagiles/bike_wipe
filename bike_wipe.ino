@@ -46,9 +46,7 @@ int sinAmp    = 1;
 float period1 = 1;
 
 uint8_t baseColors[][3] = {{232, 50, 255},   // purple
-                        {250, 100, 20},   // yellow 
                         {30, 30, 255},   // blue
-                        {237,159,176},    // pink
                         {255, 0, 0},      // red
                         {70, 87,229},     // Dark blue
                         {50,255,50},
@@ -265,8 +263,8 @@ void loop() {
       int red = baseColors[indy][0];
       int green = baseColors[indy][1];
       int blue = baseColors[indy][2];
-      shoot_wave(clocky, 5, red, green ,blue);
-      shoot_wave(clocky, 5, 0, 0 , 0);
+      shoot_wave(clocky, 7, red, green ,blue);
+      shoot_wave(clocky, 7, 0, 0 , 0);
       
       white_button_state  = digitalRead(buttonPinBlue);
       if (white_button_state == 0) {
@@ -275,6 +273,32 @@ void loop() {
       
     }
   }
+  
+  if (green_button_state == 0) {
+    green_hold_time++;}
+  else {
+    green_hold_time = 0;
+  }
+  
+  if (green_hold_time == 1){
+    Serial.println("green_button");
+    baseR = red;
+    baseG = green;
+    baseB = blue;
+    r = map(red,   0, 255, 0, baseR);
+    g = map(green, 0, 255, 0, baseG);
+    b = map(blue,  0, 255, 0, baseB);
+  }
+  if (green_hold_time > 10 ){// && heldTime < 400){
+    r =  (baseR-20) + (sin(period1 *  green_hold_time)*(sinAmp*baseR));
+    g =  (baseG-20) + (sin(period1 *  green_hold_time)*(sinAmp*baseG));
+    b =  (baseB-20) + (sin(period1 *  green_hold_time)*(sinAmp*baseB));
+    
+    lightUp(strip.Color(r, g, b));
+    return;
+  }
+  
+  
   
 
 
@@ -453,4 +477,15 @@ void turn_off() {
   }
   strip.show();
 }
+
+void lightUp(uint32_t c) {
+  for(uint16_t i=0; i<150; i++) {
+      strip.setPixelColor(i, 0);
+  }
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, c);
+  }
+  strip.show();
+}
+
 
